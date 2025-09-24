@@ -36,6 +36,18 @@
    - Increased z-index to 1000 to ensure header stays above all content.
    - Header now remains visible when scrolling through dashboard content.
 
+6. **Added Socket.io Integration**
+   - Added Socket.io client library to admin/index.html
+   - Added `initializeSocket()` function to admin/admin.js for real-time communication
+   - Implemented Socket.io event handlers for:
+     - Connection establishment and error handling
+     - SOS alert reception (`sos_alert` event)
+     - Location updates (`location_update` event)
+     - Admin notifications (`admin_notification` event)
+     - Disconnection handling
+   - Added fallback to localStorage polling when Socket.io connection fails
+   - Integrated Socket.io with existing alert and location update handling functions
+
 ## Remaining Tasks
 
 1. **Test the System**

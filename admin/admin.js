@@ -6,13 +6,62 @@ let markers = [];
 let alerts = [];
 let users = [];
 let notificationSound;
-let broadcastChannel;
+let socket;
 let currentTab = 'dashboard';
 let mapLayers = {
     police: null,
     hospitals: null,
     alerts: null
 };
+
+// Backend URL
+const BACKEND_URL = 'https://your-backend-url.onrender.com'; // Replace with your deployed backend URL
+
+// Initialize Socket.io connection
+function initializeSocket() {
+    console.log('Initializing Socket.io connection...');
+
+    // Connect to the backend server
+    socket = io(BACKEND_URL, {
+        transports: ['websocket', 'polling']
+    });
+
+    // Connection established
+    socket.on('connect', function() {
+        console.log('Connected to server with ID:', socket.id);
+    });
+
+    // Connection error
+    socket.on('connect_error', function(error) {
+        console.error('Connection error:', error);
+        // Fallback to localStorage polling if Socket.io fails
+        console.log('Falling back to localStorage polling');
+        setInterval(checkForNewAlerts, 2000);
+    });
+
+    // Handle new SOS alerts
+    socket.on('sos_alert', function(data) {
+        console.log('SOS alert received via Socket.io:', data);
+        handleNewAlert(data);
+    });
+
+    // Handle location updates
+    socket.on('location_update', function(data) {
+        console.log('Location update received via Socket.io:', data);
+        handleLocationUpdate(data);
+    });
+
+    // Handle admin notifications
+    socket.on('admin_notification', function(data) {
+        console.log('Admin notification received:', data);
+        showNotification(data);
+    });
+
+    // Handle disconnection
+    socket.on('disconnect', function() {
+        console.log('Disconnected from server');
+    });
+}
 
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', function() {
@@ -29,23 +78,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize sound
     notificationSound = document.getElementById('alertSound');
 
-    // Set up BroadcastChannel for real-time communication with user.html
-    if (typeof BroadcastChannel !== 'undefined') {
-        broadcastChannel = new BroadcastChannel('tourist-safety-alerts');
-        broadcastChannel.onmessage = function(event) {
-            console.log('Message received:', event.data);
-            if (event.data.type === 'SOS_ALERT') {
-                console.log('SOS alert received via BroadcastChannel');
-                handleNewAlert(event.data.data);
-            } else if (event.data.type === 'LOCATION_UPDATE') {
-                console.log('Location update received via BroadcastChannel');
-                handleLocationUpdate(event.data.data);
-            }
-        };
-    } else {
-        // Fallback to localStorage polling if BroadcastChannel is not supported
-        console.log('BroadcastChannel not supported, using localStorage polling');
-    }
+    // Initialize Socket.io connection
+    initializeSocket();
 
     // Load existing alerts from localStorage
     loadAlerts();

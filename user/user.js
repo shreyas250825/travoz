@@ -34,12 +34,27 @@ const hospitals = [
     { id: 4, name: "Fortis Hospital", lat: 12.9279, lng: 77.6271, distance: 0 }
 ];
 
-// Broadcast channel for real-time communication
-let broadcastChannel;
-try {
-    broadcastChannel = new BroadcastChannel('tourist-safety-alerts');
-} catch (e) {
-    console.log('BroadcastChannel not supported, using localStorage fallback');
+// Socket.io connection to backend
+let socket;
+const BACKEND_URL = 'https://your-backend-url.onrender.com'; // Replace with your deployed backend URL
+
+// Initialize Socket.io connection
+function initializeSocket() {
+    if (socket) return; // Already initialized
+
+    socket = io(BACKEND_URL);
+
+    socket.on('connect', () => {
+        console.log('Connected to backend server');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from backend server');
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('Connection error:', error);
+    });
 }
 
 // Initialize app when DOM is loaded
@@ -373,18 +388,18 @@ function triggerSOS() {
         console.log('SOS already active, returning');
         return;
     }
-    
+
     sosActive = true;
     const userData = JSON.parse(localStorage.getItem('userData'));
     console.log('User data:', userData);
     console.log('SOS sound element:', document.getElementById('sos-sound'));
     console.log('SOS button element:', document.getElementById('sos-btn'));
     console.log('Emergency tab element:', document.getElementById('emergency-tab'));
-    
+
     // Calculate nearest police station and hospital
     const nearestPolice = findNearest(policeStations, userLocation);
     const nearestHospital = findNearest(hospitals, userLocation);
-    
+
     // Create SOS data with demo date/time (22-23 Sept 2025)
     sosData = {
         id: generateId(),
@@ -402,7 +417,7 @@ function triggerSOS() {
         sentToPolice: false,
         sentToHospital: false
     };
-    
+
     // Play SOS sound
     const sosSound = document.getElementById('sos-sound');
     if (sosSound) {
@@ -411,24 +426,24 @@ function triggerSOS() {
     } else {
         console.log('SOS sound element not found');
     }
-    
-    // Save to localStorage
+
+    // Send to backend server
+    sendSOSAlertToBackend(sosData);
+
+    // Save to localStorage for local functionality
     const alerts = JSON.parse(localStorage.getItem('sosAlerts') || '[]');
     alerts.push(sosData);
     localStorage.setItem('sosAlerts', JSON.stringify(alerts));
-    
-    // Broadcast to admin
-    broadcastSOSAlert(sosData);
-    
+
     // Update UI
     displaySOSDetails();
     document.getElementById('quick-actions').style.display = 'block';
-    
+
     // Add route lines to map
     if (map) {
         showRouteToNearest();
     }
-    
+
     console.log('SOS Alert triggered:', sosData);
 }
 
@@ -518,24 +533,40 @@ function sendToFacility(type) {
     broadcastSOSAlert(sosData);
 }
 
+// Send SOS alert to backend server
+function sendSOSAlertToBackend(alertData) {
+    // Initialize socket connection if not already done
+    initializeSocket();
+
+    if (socket && socket.connected) {
+        // Send via Socket.io
+        socket.emit('sos-alert', alertData);
+        console.log('SOS alert sent to backend via Socket.io');
+    } else {
+        // Fallback: Send via HTTP POST
+        fetch(`${BACKEND_URL}/sos-alert`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(alertData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('SOS alert sent to backend via HTTP:', data);
+        })
+        .catch(error => {
+            console.error('Error sending SOS alert to backend:', error);
+        });
+    }
+}
+
 function broadcastSOSAlert(alertData) {
     console.log('Broadcasting SOS alert:', alertData);
-    // Try BroadcastChannel first
-    if (broadcastChannel) {
-        try {
-            broadcastChannel.postMessage({
-                type: 'SOS_ALERT',
-                data: alertData
-            });
-            console.log('SOS alert sent via BroadcastChannel');
-            return; // Exit early if BroadcastChannel works
-        } catch (e) {
-            console.log('BroadcastChannel failed:', e);
-        }
-    }
+    // Send to backend (primary method)
+    sendSOSAlertToBackend(alertData);
 
-    // Fallback: trigger storage event only if BroadcastChannel is not available
-    console.log('Using localStorage fallback for SOS alert');
+    // Keep localStorage for backward compatibility with existing admin dashboards
     localStorage.setItem('sosAlertBroadcast', JSON.stringify({
         timestamp: Date.now(),
         data: alertData
