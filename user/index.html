@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tourist Safety System - User App</title>
+    <link rel="stylesheet" href="user.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Mobile Phone Frame -->
+    <div class="mobile-frame">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="header-content">
+               
+                <div class="header-text">
+                    <h1>Travoz</h1>
+                     <div class="emblem">🏛️</div>
+                    <p>Government of India</p>
+                </div>
+            </div>
+            <div class="tricolor-bar">
+                <div class="saffron"></div>
+                <div class="white">
+                    <div class="ashoka-chakra">☸</div>
+                </div>
+                <div class="green"></div>
+            </div>
+        </div>
+
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen active">
+            <div class="login-container">
+                <h2>Secure KYC Login</h2>
+                <form id="kyc-form">
+                    <div class="input-group">
+                        <label for="full-name">Full Name</label>
+                        <input type="text" id="full-name" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="id-number">Passport / Aadhaar Number</label>
+                        <input type="text" id="id-number" placeholder="Enter Passport or Aadhaar number" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="kyc-code">KYC Verification Code</label>
+                        <input type="text" id="kyc-code" placeholder="Enter verification code" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="contact">Phone / Email</label>
+                        <input type="text" id="contact" placeholder="Enter phone or email" required>
+                    </div>
+                    <button type="submit" class="login-btn">
+                        <i class="fas fa-shield-alt"></i>
+                        Secure Login
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main App Screen -->
+        <div id="main-screen" class="screen">
+            <!-- User Info Bar -->
+            <div class="user-info">
+                <div class="user-details">
+                    <span id="user-name-display"></span>
+                    <div class="blockchain-id">
+                        <i class="fas fa-link"></i>
+                        <span id="blockchain-id"></span>
+                    </div>
+                </div>
+                <button id="logout-btn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="tab-btn active" data-tab="map">
+                    <i class="fas fa-map-marked-alt"></i>
+                    Map
+                </button>
+                <button class="tab-btn" data-tab="emergency">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Emergency
+                </button>
+                <button class="tab-btn" data-tab="planner">
+                    <i class="fas fa-calendar-alt"></i>
+                    Planner
+                </button>
+                <button class="tab-btn" data-tab="contacts">
+                    <i class="fas fa-phone"></i>
+                    Contacts
+                </button>
+            </div>
+
+            <!-- Map Tab -->
+            <div id="map-tab" class="tab-content active">
+                <div class="map-controls">
+                    <button id="share-location-btn" class="control-btn">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Share Live Location</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="location-toggle">
+                            <span class="slider"></span>
+                        </div>
+                    </button>
+                    <button id="clear-markers-btn" class="control-btn">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Clear All Markers</span>
+                    </button>
+                </div>
+                <div id="map" class="map-container"></div>
+                <div class="poi-legend">
+                    <div class="legend-item">
+                        <span class="legend-icon user-icon">📍</span>
+                        <span>Your Location</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-icon police-icon">🚔</span>
+                        <span>Police Stations</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-icon hospital-icon">🏥</span>
+                        <span>Hospitals</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Tab -->
+            <div id="emergency-tab" class="tab-content">
+                <div class="emergency-container">
+                    <div class="sos-section">
+                        <h3>Emergency SOS</h3>
+                        <p>Click to activate emergency alert instantly</p>
+                        <button id="sos-btn" class="sos-button">
+                            <div class="sos-ripple"></div>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>SOS</span>
+                        </button>
+                    </div>
+                    
+                    <div class="quick-actions" style="display: none;" id="quick-actions">
+                        <h4>Quick Actions</h4>
+                        <button id="send-police-btn" class="action-btn police">
+                            <i class="fas fa-car"></i>
+                            Send to Nearest Police
+                        </button>
+                        <button id="send-hospital-btn" class="action-btn hospital">
+                            <i class="fas fa-ambulance"></i>
+                            Send to Nearest Hospital
+                        </button>
+                    </div>
+
+                    <div id="sos-details" class="sos-details" style="display: none;">
+                        <h4>SOS Alert Sent</h4>
+                        <div class="details-content">
+                            <p><strong>Location:</strong> <span id="sos-location"></span></p>
+                            <p><strong>Nearest Police:</strong> <span id="nearest-police"></span></p>
+                            <p><strong>Nearest Hospital:</strong> <span id="nearest-hospital"></span></p>
+                            <p><strong>Blockchain Hash:</strong> <span id="sos-hash"></span></p>
+                            <p><strong>Time:</strong> <span id="sos-time"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planner Tab -->
+            <div id="planner-tab" class="tab-content">
+                <div class="planner-container">
+                    <h3>Travel Planner</h3>
+                    <form id="reminder-form" class="reminder-form">
+                        <input type="datetime-local" id="reminder-datetime" required>
+                        <input type="text" id="reminder-note" placeholder="Add reminder note" required>
+                        <button type="submit">
+                            <i class="fas fa-plus"></i>
+                            Add Reminder
+                        </button>
+                    </form>
+                    <div id="reminders-list" class="reminders-list">
+                        <h4>Upcoming Reminders</h4>
+                        <div id="reminders-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contacts Tab -->
+            <div id="contacts-tab" class="tab-content">
+                <div class="contacts-container">
+                    <h3>Emergency Contacts</h3>
+                    <div class="contact-list">
+                        <div class="contact-item">
+                            <div class="contact-info">
+                                <h4>Tourist Helpline</h4>
+                                <p>24/7 Support</p>
+                            </div>
+                            <div class="contact-actions">
+                                <a href="tel:+911363" class="contact-btn call">
+                                    <i class="fas fa-phone"></i>
+                                </a>
+                                <a href="mailto:help@incredibleindia.org" class="contact-btn message">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-info">
+                                <h4>Police Emergency</h4>
+                                <p>Immediate Response</p>
+                            </div>
+                            <div class="contact-actions">
+                                <a href="tel:100" class="contact-btn call">
+                                    <i class="fas fa-phone"></i>
+                                </a>
+                                <a href="sms:100" class="contact-btn message">
+                                    <i class="fas fa-sms"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-info">
+                                <h4>Medical Emergency</h4>
+                                <p>Ambulance Service</p>
+                            </div>
+                            <div class="contact-actions">
+                                <a href="tel:108" class="contact-btn call">
+                                    <i class="fas fa-phone"></i>
+                                </a>
+                                <a href="sms:108" class="contact-btn message">
+                                    <i class="fas fa-sms"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="sos-sound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBj2U2vPEbRAeQ5vf2JOjUB8JQp7h2I+JVQsKhLHt2ZuJWgsJkM/H3pOJVwsKq87m0pWKUwsJc8Hd36qOTRAKdrTN2KOQSw4LjbnuJ8Jn2/jfklQNCG2Z4u2oUBYMZ9bt0ZOJVwsKT6je1JePRRMLkPHZ3pOJVwsKWpHh0aOQSw4LgbLn3J2JVwsKcb/g2ZIUDC9o1e3cjjcbBj2h4Oyro1UfCjiS2vTCdyMGKnjA8d+PQgcRXLfr6aVUAQtBnNvbmVEMCUCg5N+JVwsKhrDm2JOJVwsKNpbf0pmJVgsMWovC5Y2EQA8VY7LCa12RWksMLPvY3pOJVwsKJb3h2ZIUDC9z0d+PQgcRWrXF0ZOJVwsKLZbc2pOJVwsKeZ/U2ZOJVwsKT6je1JePRRMLhb7h2I+JVwsKer7X2ZOJVwsKaKfp2ZOJVwsKLZbc2pOJVwsKAb3h2ZIUDC9z0d+PQgcR" type="audio/wav">
+    </audio>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="user.js"></script>
+</body>
+</html>

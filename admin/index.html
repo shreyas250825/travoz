@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Tourist Safety System</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjZmY5OTMzIiBkPSJNMTYgOTZIMzA0VjE2OEgxNloiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJNMTYgMTY4SDMwNFYyODhIMTZaIi8+PHBhdGggZmlsbD0iIzM5OTYzNyIgZD0iTTE2IDI4OEgzMDRWMzY4SDE2WiIvPjxjaXJjbGUgY3g9IjI1NiIgY3k9IjIyOCIgcj0iMjAiIGZpbGw9IiMwMDUyYjgiLz48L3N2Zz4=" alt="India Flag" class="flag-icon">
+                <h1>Tourist Safety System</h1>
+                <p>Government of India</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="officerId">Officer ID</label>
+                    <input type="text" id="officerId" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard (hidden initially) -->
+    <div id="dashboard" class="dashboard hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="title-section">
+                    <h1>Government of India — Tourist Safety System</h1>
+                    <p>Admin Dashboard</p>
+                </div>
+                <div class="user-info">
+                    <button id="backBtn" class="back-btn">Back</button>
+                    <span id="officerName">Officer: Admin</span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </div>
+            <div class="tricolor-bar">
+                <div class="saffron"></div>
+                <div class="white">
+                    <div class="ashoka-chakra"></div>
+                </div>
+                <div class="green"></div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="dashboard">
+                <i class="icon">📊</i>
+                <span>Dashboard</span>
+            </button>
+            <button class="tab-btn" data-tab="alerts">
+                <i class="icon">🚨</i>
+                <span>SOS Alerts</span>
+            </button>
+            <button class="tab-btn" data-tab="map">
+                <i class="icon">🗺️</i>
+                <span>Map View</span>
+            </button>
+            <button class="tab-btn" data-tab="users">
+                <i class="icon">👥</i>
+                <span>User Management</span>
+            </button>
+            <button class="tab-btn" data-tab="reports">
+                <i class="icon">📈</i>
+                <span>Reports</span>
+            </button>
+            <button class="tab-btn" data-tab="settings">
+                <i class="icon">⚙️</i>
+                <span>Settings</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab" class="tab-content active">
+                <!-- Analytics Overview Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2 class="section-title">📊 Analytics Overview</h2>
+                    </div>
+                    <div class="card analytics-section">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="totalAlerts">0</div>
+                                <div class="stat-label">Total Alerts</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="resolvedAlerts">0</div>
+                                <div class="stat-label">Resolved</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="pendingAlerts">0</div>
+                                <div class="stat-label">Pending</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="activeTourists">0</div>
+                                <div class="stat-label">Active Tourists</div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="analyticsChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quick Actions Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2 class="section-title">⚡ Quick Actions</h2>
+                        <span class="section-subtitle">Common Tasks</span>
+                    </div>
+                    <div class="card quick-actions-section">
+                        <div class="actions-grid">
+                            <button class="action-btn primary" onclick="switchToTab('alerts')">
+                                <i class="icon">🚨</i>
+                                <span>View SOS Alerts</span>
+                            </button>
+                            <button class="action-btn secondary" onclick="switchToTab('map')">
+                                <i class="icon">🗺️</i>
+                                <span>Open Map View</span>
+                            </button>
+                            <button class="action-btn tertiary" onclick="switchToTab('reports')">
+                                <i class="icon">📈</i>
+                                <span>Generate Report</span>
+                            </button>
+                            <button class="action-btn quaternary" onclick="switchToTab('users')">
+                                <i class="icon">👥</i>
+                                <span>Manage Users</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Activity & Verification Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2 class="section-title">📋 Activity & Verification</h2>
+                        <span class="section-subtitle">Recent Activity & Blockchain</span>
+                    </div>
+                    <div class="card activity-section">
+                        <div class="activity-content">
+                            <div class="activity-panel">
+                                <h3>Recent Activity</h3>
+                                <div id="recentActivity" class="activity-list">
+                                    <p class="no-activity">No recent activity</p>
+                                </div>
+                            </div>
+                            <div class="verification-panel">
+                                <h3>🔐 Blockchain Verification</h3>
+                                <div id="verificationPanel" class="verification-section">
+                                    <p>Select an alert to verify its blockchain integrity</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- System Status Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2 class="section-title">🔧 System Status</h2>
+                        <span class="section-subtitle">Service Health</span>
+                    </div>
+                    <div class="card status-section">
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <div class="status-indicator online"></div>
+                                <span>Blockchain Network</span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-indicator online"></div>
+                                <span>Emergency Services</span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-indicator online"></div>
+                                <span>Map Services</span>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-indicator online"></div>
+                                <span>Notification System</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Notifications Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2 class="section-title">🔔 Notifications</h2>
+                        <span class="section-subtitle">Real-time Alerts</span>
+                    </div>
+                    <div class="card notifications-section">
+                        <div class="section-header">
+                            <h3>Active Notifications</h3>
+                            <button id="clearNotifications" class="clear-btn">Clear All</button>
+                        </div>
+                        <div id="notificationList" class="notification-list">
+                            <!-- Notifications will be populated here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- SOS Alerts Tab -->
+            <div id="alerts" class="tab-content">
+                <div class="content-grid">
+                    <!-- Alerts Table -->
+                    <section class="card alerts-section full-width">
+                        <div class="section-header">
+                            <h2>Active SOS Alerts</h2>
+                            <div class="alert-badge" id="alertBadge">0</div>
+                        </div>
+                        <div class="table-container">
+                            <table id="alertsTable">
+                                <thead>
+                                    <tr>
+                                        <th>User Name</th>
+                                        <th>ID Number</th>
+                                        <th>Blockchain ID</th>
+                                        <th>Location</th>
+                                        <th>Date/Time</th>
+                                        <th>Nearest Police</th>
+                                        <th>Nearest Hospital</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alertsTableBody">
+                                    <!-- Alerts will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Alert Details -->
+                    <section class="card alert-details-section">
+                        <h2>Alert Details</h2>
+                        <div id="alertDetails" class="alert-details">
+                            <p>Select an alert to view details</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Map View Tab -->
+            <div id="map" class="tab-content">
+                <div class="content-grid">
+                    <!-- Map Section -->
+                    <section class="card map-section full-width">
+                        <div class="section-header">
+                            <h2>SOS Alerts Map</h2>
+                            <div class="map-controls">
+                                <button class="control-btn" onclick="toggleMapLayer('police')">
+                                    <i class="icon">👮</i>
+                                    <span>Police Stations</span>
+                                </button>
+                                <button class="control-btn" onclick="toggleMapLayer('hospitals')">
+                                    <i class="icon">🏥</i>
+                                    <span>Hospitals</span>
+                                </button>
+                                <button class="control-btn" onclick="toggleMapLayer('alerts')">
+                                    <i class="icon">🚨</i>
+                                    <span>SOS Alerts</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="map"></div>
+                    </section>
+
+                    <!-- Map Legend -->
+                    <section class="card legend-section">
+                        <h2>Map Legend</h2>
+                        <div class="legend-content">
+                            <div class="legend-item">
+                                <div class="legend-icon" style="background: #ff0000; border-radius: 50%;"></div>
+                                <span>Active SOS Alert</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-icon" style="background: #0066cc; border-radius: 50%;"></div>
+                                <span>Police Station</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-icon" style="background: #00aa00; border-radius: 50%;"></div>
+                                <span>Hospital</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-icon" style="background: #ff6600; border-radius: 50%;"></div>
+                                <span>Resolved Alert</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- User Management Tab -->
+            <div id="users" class="tab-content">
+                <div class="content-grid">
+                    <!-- User Statistics -->
+                    <section class="card user-stats-section">
+                        <h2>User Statistics</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="totalUsers">0</div>
+                                <div class="stat-label">Total Users</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="activeUsers">0</div>
+                                <div class="stat-label">Active Now</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="newUsersToday">0</div>
+                                <div class="stat-label">New Today</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="verifiedUsers">0</div>
+                                <div class="stat-label">Verified</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- User Search -->
+                    <section class="card user-search-section">
+                        <h2>User Search</h2>
+                        <div class="search-form">
+                            <input type="text" id="userSearch" placeholder="Search by name, ID, or blockchain ID...">
+                            <button onclick="searchUsers()" class="search-btn">Search</button>
+                        </div>
+                    </section>
+
+                    <!-- User List -->
+                    <section class="card user-list-section full-width">
+                        <h2>Registered Users</h2>
+                        <div class="table-container">
+                            <table id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>ID Number</th>
+                                        <th>Blockchain ID</th>
+                                        <th>Phone</th>
+                                        <th>Status</th>
+                                        <th>Last Active</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <!-- Users will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reports" class="tab-content">
+                <div class="content-grid">
+                    <!-- Report Generation -->
+                    <section class="card report-generator-section">
+                        <h2>Generate Reports</h2>
+                        <div class="report-form">
+                            <div class="form-group">
+                                <label>Report Type</label>
+                                <select id="reportType">
+                                    <option value="daily">Daily Report</option>
+                                    <option value="weekly">Weekly Report</option>
+                                    <option value="monthly">Monthly Report</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date Range</label>
+                                <input type="date" id="startDate"> to <input type="date" id="endDate">
+                            </div>
+                            <button onclick="generateReport()" class="generate-btn">Generate Report</button>
+                        </div>
+                    </section>
+
+                    <!-- Report Summary -->
+                    <section class="card report-summary-section">
+                        <h2>Report Summary</h2>
+                        <div id="reportSummary" class="report-summary">
+                            <p>Select parameters and generate a report to view summary</p>
+                        </div>
+                    </section>
+
+                    <!-- Export Options -->
+                    <section class="card export-section">
+                        <h2>Export Options</h2>
+                        <div class="export-buttons">
+                            <button onclick="exportReport('pdf')" class="export-btn pdf">Export as PDF</button>
+                            <button onclick="exportReport('excel')" class="export-btn excel">Export as Excel</button>
+                            <button onclick="exportReport('csv')" class="export-btn csv">Export as CSV</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="content-grid">
+                    <!-- System Settings -->
+                    <section class="card system-settings-section">
+                        <h2>System Settings</h2>
+                        <div class="settings-form">
+                            <div class="setting-item">
+                                <label>Auto-refresh Interval (seconds)</label>
+                                <input type="number" id="refreshInterval" value="30" min="10" max="300">
+                            </div>
+                            <div class="setting-item">
+                                <label>Max Alerts Display</label>
+                                <input type="number" id="maxAlerts" value="50" min="10" max="200">
+                            </div>
+                            <div class="setting-item">
+                                <label>Notification Sound</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="soundEnabled" checked>
+                                    <label for="soundEnabled" class="slider"></label>
+                                </div>
+                            </div>
+                            <button onclick="saveSettings()" class="save-btn">Save Settings</button>
+                        </div>
+                    </section>
+
+                    <!-- Blockchain Settings -->
+                    <section class="card blockchain-settings-section">
+                        <h2>Blockchain Configuration</h2>
+                        <div class="blockchain-info">
+                            <div class="info-item">
+                                <span class="label">Network:</span>
+                                <span class="value" id="blockchainNetwork">Ethereum Mainnet</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Last Block:</span>
+                                <span class="value" id="lastBlock">18923456</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Gas Price:</span>
+                                <span class="value" id="gasPrice">25 Gwei</span>
+                            </div>
+                            <button onclick="refreshBlockchainInfo()" class="refresh-btn">Refresh</button>
+                        </div>
+                    </section>
+
+                    <!-- Emergency Contacts -->
+                    <section class="card emergency-contacts-section full-width">
+                        <h2>Emergency Contacts</h2>
+                        <div class="contacts-form">
+                            <div class="form-group">
+                                <label>Police Control Room</label>
+                                <input type="text" id="policeContact" placeholder="Enter police contact number">
+                            </div>
+                            <div class="form-group">
+                                <label>Hospital Emergency</label>
+                                <input type="text" id="hospitalContact" placeholder="Enter hospital contact number">
+                            </div>
+                            <div class="form-group">
+                                <label>Fire Department</label>
+                                <input type="text" id="fireContact" placeholder="Enter fire department number">
+                            </div>
+                            <button onclick="updateEmergencyContacts()" class="update-btn">Update Contacts</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Sound notification element (hidden) -->
+    <audio id="alertSound" preload="auto">
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAASAAAScABDQ0NGRkZJSUlMTExQUFBUVFRYWFhcXFxgYGBkZGRoaGhsbGxwcHB0dHR4eHh8fHyAgICEhISIiIiMjIyQkJCUlJSYmJicnJygoKCkpKSoqKisrKywsLC0tLS4uLi8vLzAwMDExMTIyMjMzMzQ0NDU1NTY2Njc3Nzg4ODk5OTo6Ojs7Ozw8PD09PT4+Pj8/P0BAQEFBQUJCQkNDQ0REREVFRUZGRkdHR0hISElJSUpKSktLS0xMTE1NTU5OTk9PT1BQUFFRUVJSUlNTU1RUVFVVVVZWVldXV1hYWFlZWVpaWltbW1xcXF1dXV5eXl9fX2BgYGFhYWJiYmNjY2RkZGVlZWZmZmdnZ2hoaGlpaWpqamtra2xsbG1tbW5ubm9vb3BwcHFxcXJycnNzc3R0dHV1dXZ2dnd3d3h4eHl5eXp6ent7e3x8fH19fX5+fn9/f4CAgIGBgYKCgoODg4SEhIWFhYaGhoeHh4iIiImJiYqKiouLi4yMjI2NjY6Ojo+Pj5CQkJGRkZKSkpOTk5SUlJWVlZaWlpeXl5iYmJmZmZqampubm5ycnJ2dnZ6enp+fn6CgoKGhoaKioqOjo6SkpKWlpaampqenp6ioqKmpqaqqqqurq6ysrK2tra6urq+vr7CwsLGxsbKysrOzs7S0tLW1tba2tre3t7i4uLm5ubq6uru7u7y8vL29vb6+vr+/v8DAwMHBwcLCwsPDw8TExMXFxcbGxsfHx8jIyMnJycrKysvLy8zMzM3Nzc7Ozs/Pz9DQ0NHR0dLS0tPT09TU1NXV1dbW1tfX19jY2NnZ2dra2tvb29zc3N3d3d7e3t/f3+Dg4OHh4eLi4uPj4+Tk5OXl5ebm5ufn5+jo6Onp6erq6uvr6+zs7O3t7e7u7u/v7/Dw8PHx8fLy8vPz8/T09PX19fb29vf39/j4+Pn5+fr6+vv7+/z8/P39/f7+/v///wAAAAA4QklNBCYAAAAAAA4AAAABAAAAnAAAABAAAAASAAAAAEAAABJQkNFREVGSElKTE1OUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8AAABISURBVHjaYvz//z8DEwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAP//AwDQAwLQAAAAAElFTkSuQmCC" type="audio/mpeg">
+    </audio>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
