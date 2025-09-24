@@ -16,6 +16,9 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the root directory (includes user/ and admin/ folders)
+app.use(express.static(__dirname));
+
 // In-memory storage for alerts (for demo purposes)
 let alerts = [];
 
