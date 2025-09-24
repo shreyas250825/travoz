@@ -156,4 +156,6 @@ server.listen(PORT, () => {
   console.log(`Health check: http://localhost:${PORT}/health`);
   console.log(`Alerts API: http://localhost:${PORT}/alerts`);
   console.log(`SOS Alert endpoint: POST http://localhost:${PORT}/sos-alert`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Render deployment URL: https://travoz.onrender.com`);
 });

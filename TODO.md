@@ -48,6 +48,11 @@
    - Added fallback to localStorage polling when Socket.io connection fails
    - Integrated Socket.io with existing alert and location update handling functions
 
+7. **Updated Frontend to Use Deployed Render Server**
+   - Updated `BACKEND_URL` in `user/user.js` from `'https://your-backend-url.onrender.com'` to `'https://travoz.onrender.com'`
+   - Updated `BACKEND_URL` in `admin/admin.js` from `'https://your-backend-url.onrender.com'` to `'https://travoz.onrender.com'`
+   - Both user app and admin dashboard now connect to the deployed Render server for real-time SOS alerts and data fetching
+
 ## Remaining Tasks
 
 1. **Test the System**

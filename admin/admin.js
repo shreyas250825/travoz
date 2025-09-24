@@ -15,7 +15,7 @@ let mapLayers = {
 };
 
 // Backend URL
-const BACKEND_URL = 'https://your-backend-url.onrender.com'; // Replace with your deployed backend URL
+const BACKEND_URL = 'https://travoz.onrender.com'; // Deployed backend URL
 
 // Initialize Socket.io connection
 function initializeSocket() {
