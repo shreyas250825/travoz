@@ -21,7 +21,7 @@ let sosData = null;
 
 // Mock POI data for Bengaluru area
 const policeStations = [
-    { id: 1, name: "Cubbon Park Police Station", lat: 12.9762, lng: 77.5993, distance: 0 },
+    { id: 1, name: "Jalahalli Police Station", lat: 12.9762, lng: 77.5993, distance: 1 },
     { id: 2, name: "Vidhana Soudha Police Station", lat: 12.9795, lng: 77.5910, distance: 0 },
     { id: 3, name: "UB City Police Station", lat: 12.9719, lng: 77.6095, distance: 0 },
     { id: 4, name: "Commercial Street Police Station", lat: 12.9831, lng: 77.6101, distance: 0 }
